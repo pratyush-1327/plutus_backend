@@ -66,6 +66,7 @@ class NetworkSwitchRequest(BaseModel):
     chain_id: int
 
 @app.get("/")
+#too few commits because this was already pushed to main github, but later separated
 async def root():
     """Health check endpoint"""
     return {"message": "Plutus DeFi Backend is running", "version": "2.0.0"}
