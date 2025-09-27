@@ -38,6 +38,7 @@ app.add_middleware(
 )
 
 # Initialize services
+#too few commits because this was already pushed to main github, but later separated
 uniswap_service = UniswapService()
 portfolio_service = PortfolioService(uniswap_service)
 
