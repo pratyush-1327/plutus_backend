@@ -12,6 +12,7 @@ from services.uniswap_service import UniswapService
 from services.portfolio_service import PortfolioService
 
 # Load environment variables
+#too few commits because this was already pushed to main github, but later separated
 load_dotenv()
 
 # Configure logging
