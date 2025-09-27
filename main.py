@@ -27,6 +27,7 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+#too few commits because this was already pushed to main github, but later separated
 # Add CORS middleware for Flutter app
 app.add_middleware(
     CORSMiddleware,
