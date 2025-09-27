@@ -45,7 +45,7 @@ class SubgraphPosition(BaseModel):
     pool: Dict[str, Any]
     tickLower: Dict[str, Any]
     tickUpper: Dict[str, Any]
-
+#too few commits because this was already pushed to main github, but later separated
 class TokenPrice(BaseModel):
     """Token price data"""
     address: str
