@@ -1,6 +1,19 @@
-# Uniswap Flutter Backend
+# Plutus DeFi Backend
 
-A Python backend service that integrates with Uniswap V3 to provide portfolio data for Flutter mobile applications. This backend fetches LP positions, calculates current values, and tracks 24-hour P&L performance.
+A comprehensive Python backend service built with FastAPI that provides DeFi portfolio management capabilities for Flutter mobile applications. This backend integrates with Uniswap V3, provides portfolio analytics, swap simulations, and multi-chain support.
+
+## Features
+
+- **Multi-Chain Support**: Ethereum, Polygon, and Optimism networks
+- **Uniswap V3 Integration**: LP position tracking and value calculations
+- **Portfolio Analytics**: Historical performance and P&L tracking
+- **Swap Simulation**: Token swap estimates with price impact analysis
+- **Liquidity Management**: Add liquidity simulations and fee claiming
+- **Real-time Data**: Current token prices and position values
+- **Interactive API Docs**: Automatic OpenAPI documentation with Swagger UI
+- **RESTful API**: 12 comprehensive endpoints for complete DeFi functionalitylutter Backend
+
+A Python backend service that integrates with Uniswap V3 to provide portfolio data for Flutter mobile applications. This backend fetches LP positions, calculates current values, and tracks 24-hour P&L perfo5. **ASGI Server**: Use Gunicorn with Uvicorn workers or standalone Uvicorn instead of the development servermance.
 
 ## Features
 
@@ -12,28 +25,29 @@ A Python backend service that integrates with Uniswap V3 to provide portfolio da
 
 ## Tech Stack
 
-- **Flask 3.0**: Python web framework
+- **FastAPI 3.0**: Modern Python web framework with automatic OpenAPI docs
 - **Requests**: HTTP client for external API calls
+- **Pydantic**: Data validation and serialization
 - **Python 3.13**: Modern Python runtime
+- **CORS**: Cross-origin resource sharing support for Flutter apps
 
 ## API Endpoints
 
-### Health Check
+### Root / Health Check
 ```
 GET /
 ```
-Returns service status
+Returns basic service status and version information.
 
-### Get Portfolio Data
+### Portfolio Data
 ```
-GET /portfolio/{address}
+GET /portfolio/{address}?chain_id={chain_id}
 ```
+Returns complete portfolio data including LP positions, values, and P&L.
 
-Returns complete portfolio data including:
-- All V3 liquidity positions
-- Current position values in USD
-- 24-hour P&L percentage and USD amount
-- Token holdings breakdown
+**Parameters:**
+- `address` (path): Ethereum wallet address
+- `chain_id` (query, optional): Blockchain network ID (1=Ethereum, 137=Polygon, 10=Optimism)
 
 **Example Response:**
 ```json
@@ -42,6 +56,8 @@ Returns complete portfolio data including:
   "total_value_usd": 5000000013250.0,
   "pnl_24h_percent": 0.10,
   "pnl_24h_usd": 5000000350.0,
+  "chain_id": 1,
+  "chain_name": "Ethereum",
   "positions": [
     {
       "position_id": "123456",
@@ -72,11 +88,92 @@ Returns complete portfolio data including:
 }
 ```
 
+### Analytics Data
+```
+GET /analytics/{address}?timeframe={timeframe}&chain_id={chain_id}
+```
+Get analytics data for portfolio including historical performance.
+
+**Parameters:**
+- `address` (path): Ethereum wallet address
+- `timeframe` (query, optional): Time range for analytics (24h, 7d, 30d, 1y)
+- `chain_id` (query, optional): Blockchain network ID
+
+### Performance Metrics
+```
+GET /performance/{address}?chain_id={chain_id}
+```
+Get performance metrics and historical data including PnL, fees earned, and impermanent loss.
+
+### Swap Simulation
+```
+POST /swap/simulate
+```
+Simulate a token swap transaction with price impact and gas estimates.
+
+**Request Body:**
+```json
+{
+  "wallet_address": "0x...",
+  "token_in": "0x...",
+  "token_out": "0x...",
+  "amount_in": "1000",
+  "slippage": 0.5,
+  "chain_id": 1
+}
+```
+
+### Add Liquidity Simulation
+```
+POST /liquidity/add/simulate
+```
+Simulate adding liquidity to Uniswap V3 with estimated APY and gas costs.
+
+**Request Body:**
+```json
+{
+  "wallet_address": "0x...",
+  "token0": "0x...",
+  "token1": "0x...",
+  "amount0": "1000",
+  "amount1": "500",
+  "fee": 3000,
+  "tick_lower": -276320,
+  "tick_upper": -276300,
+  "chain_id": 1
+}
+```
+
+### Popular Tokens
+```
+GET /tokens/popular/{chain_id}
+```
+Get popular tokens for a specific blockchain network.
+
+### Supported Networks
+```
+GET /networks
+```
+Get all supported blockchain networks with their details and RPC endpoints.
+
+### Claim Position Fees
+```
+POST /positions/{position_id}/claim
+```
+Simulate claiming fees from a Uniswap V3 position.
+
+**Request Body:**
+```json
+{
+  "wallet_address": "0x..."
+}
+```
+
 ### Health Check
 ```
 GET /health
 ```
-Detailed service health information
+Detailed service health information with status and version details.
 
 ## Installation
 
@@ -96,7 +193,7 @@ python main.py
 
 ### VS Code Tasks
 The project includes a VS Code task for running the server:
-- **Start Flask Server**: Runs `python main.py` in the background
+- **Start Flask Server**: Runs `python main.py` in the background (starts FastAPI with Uvicorn)
 
 ### Testing Endpoints
 ```bash
@@ -104,8 +201,37 @@ The project includes a VS Code task for running the server:
 curl http://localhost:8000/
 
 # Test portfolio endpoint
-curl http://localhost:8000/portfolio/0x742d35cC6632C0532C3E7C6E66B1fDA2bD3c6f7C
+curl "http://localhost:8000/portfolio/0x742d35cC6632C0532C3E7C6E66B1fDA2bD3c6f7C?chain_id=1"
+
+# Test analytics endpoint
+curl "http://localhost:8000/analytics/0x742d35cC6632C0532C3E7C6E66B1fDA2bD3c6f7C?timeframe=7d"
+
+# Test popular tokens
+curl http://localhost:8000/tokens/popular/1
+
+# Test supported networks
+curl http://localhost:8000/networks
+
+# Test swap simulation
+curl -X POST "http://localhost:8000/swap/simulate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet_address": "0x742d35cC6632C0532C3E7C6E66B1fDA2bD3c6f7C",
+    "token_in": "0xa0b86a33e6d3c7e6b6ed2df4fe3c396d8b7b8dc2",
+    "token_out": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "amount_in": "1000",
+    "slippage": 0.5,
+    "chain_id": 1
+  }'
+
+# Test detailed health check
+curl http://localhost:8000/health
 ```
+
+### Interactive API Documentation
+FastAPI provides automatic interactive API documentation:
+- **Swagger UI**: Visit `http://localhost:8000/docs`
+- **ReDoc**: Visit `http://localhost:8000/redoc`
 
 ## Environment Variables
 
